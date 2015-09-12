@@ -48,9 +48,15 @@ void PostHelloWorld(const char* address, const char* endpoint) {
     std::cout << r3->content.rdbuf() << std::endl;
 }
 
-int main() {
+int main(int argc, const char* argv[]) {
 
-    const int numThreads = 4;
+    const unsigned int numThreads = [&]{
+        if (argc == 1) {
+            return std::thread::hardware_concurrency();
+        }
+        return (unsigned int) std::atoi(argv[1]);
+    }();
+
     const int port = 8080;
 
     auto server = SetupServer(port, numThreads);
@@ -59,7 +65,7 @@ int main() {
         server->start();
     });
 
-    std::cout << "listening on port " << port << "..." << std::endl;
+    std::cout << "listening on port " << port << " with " << numThreads << " threads..." << std::endl;
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 

@@ -13,7 +13,7 @@ lib boost_filesystem : : <file>needs/boost/build/host/x86_64/lib/libboost_filesy
 lib ssl              : : <file>needs/openssl/build/host/x86_64/lib/libssl.a ;
 lib crypto           : : <file>needs/openssl/build/host/x86_64/lib/libcrypto.a ;
 
-exe server : [ glob src/*.cpp ]
+alias libdeps :
 	boost_system
 	boost_thread
 	boost_coroutine
@@ -21,7 +21,14 @@ exe server : [ glob src/*.cpp ]
 	boost_filesystem
 	ssl
 	crypto
-:
+: :
 	<link>static
+;
+
+exe rest-server : [ glob src/*.cpp ] libdeps :
+	<cxxflags>"--std=c++1y -fcolor-diagnostics $(CFLAGS)"
+;
+
+exe stresser : [ glob tests/*.cpp ] libdeps :
 	<cxxflags>"--std=c++1y -fcolor-diagnostics $(CFLAGS)"
 ;
