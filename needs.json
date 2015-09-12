@@ -1,3 +1,51 @@
 {
-	"libraries": {}
+	"libraries": {
+		"openssl": {
+			"repository": "git@github.com:openssl/openssl.git",
+			"commit": "OpenSSL_1_0_1p",
+			"project": {
+				"conditionals": {
+					"platform": {
+						"darwin": {
+							"build-steps": [
+								"bash ./Configure darwin64-x86_64-cc --prefix={build_directory}",
+								"make",
+								"make test",
+								"make install"
+							]
+						}
+					}
+				}
+			}
+		},
+		"boost": {
+			"repository": "git@github.com:boostorg/boost.git",
+			"commit": "boost-1.59.0",
+			"project": {
+				"post-clean": "./bootstrap.sh",
+				"pre-build": "b2 headers",
+				"b2-args": [
+					"--with-filesystem",
+					"--with-thread",
+					"--with-coroutine",
+					"--with-context"
+				],
+				"conditionals": {
+					"platform": {
+						"!host": { "build": false }
+					}
+				}
+			}
+		},
+		"simple-web-server": {
+			"repository": "git@github.com:eidheim/Simple-Web-Server.git",
+			"commit": "v1.4",
+			"project": {
+				"build-steps": [
+					"mkdir -p {build_directory}/include",
+					"sh -c 'cp *.hpp {build_directory}/include'"
+				]
+			}
+		}
+	}
 }
