@@ -1,4 +1,27 @@
 
-exe server : [ glob src/*.cpp ] :
-	<cxxflags>"--std=c++1y -fcolor-diagnostics"
+rule trim-newline ( str ) {
+   return [ MATCH "([^\n]*)" : $(str) ] ;
+}
+
+local CFLAGS  = [ trim-newline [ SHELL "needy cflags" ] ] ;
+
+lib boost_system     : : <file>needs/boost/build/host/x86_64/lib/libboost_system.a ;
+lib boost_thread     : : <file>needs/boost/build/host/x86_64/lib/libboost_thread.a ;
+lib boost_coroutine  : : <file>needs/boost/build/host/x86_64/lib/libboost_coroutine.a ;
+lib boost_context    : : <file>needs/boost/build/host/x86_64/lib/libboost_context.a ;
+lib boost_filesystem : : <file>needs/boost/build/host/x86_64/lib/libboost_filesystem.a ;
+lib ssl              : : <file>needs/openssl/build/host/x86_64/lib/libssl.a ;
+lib crypto           : : <file>needs/openssl/build/host/x86_64/lib/libcrypto.a ;
+
+exe server : [ glob src/*.cpp ]
+	boost_system
+	boost_thread
+	boost_coroutine
+	boost_context
+	boost_filesystem
+	ssl
+	crypto
+:
+	<link>static
+	<cxxflags>"--std=c++1y -fcolor-diagnostics $(CFLAGS)"
 ;
