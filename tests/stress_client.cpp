@@ -36,14 +36,14 @@ int main(int argc, const char* argv[]) {
     }();
 
     const unsigned int numThreads = [&]{
-        if (argc == 3) {
+        if (argc >= 3) {
             return (unsigned int) std::atoi(argv[2]);
         }
         return std::thread::hardware_concurrency();
     }();
 
     const unsigned int requestsPerThread = [&]{
-        if (argc == 4) {
+        if (argc >= 4) {
             return std::atoi(argv[3]);
         }
         return 10000;
