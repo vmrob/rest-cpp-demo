@@ -6,9 +6,9 @@
 
 typedef SimpleWeb::Client<SimpleWeb::HTTPS> HttpsClient;
 
-size_t ClientStressThread(size_t trials) {
+size_t ClientStressThread(const char* hostname, size_t trials) {
 
-    HttpsClient client("localhost:8080", false);
+    HttpsClient client(hostname, false);
 
     std::stringstream ss("hello world!");
 
@@ -27,23 +27,31 @@ size_t ClientStressThread(size_t trials) {
 
 int main(int argc, const char* argv[]) {
 
-    const unsigned int numThreads = [&]{
+    const char* hostname = [&]{
         if (argc == 1) {
-            return std::thread::hardware_concurrency();
+            std::cout << "usage: stress_client hostname:port [threads] [requests]" << std::endl;
+            std::exit(1);
         }
-        return (unsigned int) std::atoi(argv[1]);
+        return argv[1];
+    }();
+
+    const unsigned int numThreads = [&]{
+        if (argc == 3) {
+            return (unsigned int) std::atoi(argv[2]);
+        }
+        return std::thread::hardware_concurrency();
     }();
 
     const unsigned int requestsPerThread = [&]{
-        if (argc != 3) {
-            return 10000;
+        if (argc == 4) {
+            return std::atoi(argv[3]);
         }
-        return std::atoi(argv[2]);
+        return 10000;
     }();
 
     std::vector<std::future<size_t>> futures;
 
-    std::cout << "sending " << requestsPerThread * numThreads << " requests across " << numThreads << " threads..." << std::endl;
+    std::cout << "sending " << requestsPerThread * numThreads << " requests across " << numThreads << " threads to " << hostname << "..." << std::endl;
 
     size_t totalMicroseconds = 0;
     size_t totalRequests = requestsPerThread * numThreads;
@@ -51,7 +59,7 @@ int main(int argc, const char* argv[]) {
     auto start = std::chrono::steady_clock::now();
 
     for (size_t i = 0; i < numThreads; ++i) {
-        futures.emplace_back(std::async(std::launch::async, ClientStressThread, requestsPerThread));
+        futures.emplace_back(std::async(std::launch::async, ClientStressThread, hostname, requestsPerThread));
     }
 
     std::cout << "waiting for results..." << std::endl;
