@@ -1,0 +1,4 @@
+
+exe server : [ glob src/*.cpp ] :
+	<cxxflags>"--std=c++1y -fcolor-diagnostics"
+;
