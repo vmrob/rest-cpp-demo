@@ -4,16 +4,46 @@ rule trim-newline ( str ) {
 }
 
 local CFLAGS  = [ trim-newline [ SHELL "needy cflags" ] ] ;
+local LDFLAGS = [ trim-newline [ SHELL "needy ldflags" ] ] ;
 
-lib boost_system     : : <file>needs/boost/build/host/x86_64/lib/libboost_system.a ;
-lib boost_thread     : : <file>needs/boost/build/host/x86_64/lib/libboost_thread.a ;
-lib boost_coroutine  : : <file>needs/boost/build/host/x86_64/lib/libboost_coroutine.a ;
-lib boost_context    : : <file>needs/boost/build/host/x86_64/lib/libboost_context.a ;
-lib boost_filesystem : : <file>needs/boost/build/host/x86_64/lib/libboost_filesystem.a ;
-lib ssl              : : <file>needs/openssl/build/host/x86_64/lib/libssl.a ;
-lib crypto           : : <file>needs/openssl/build/host/x86_64/lib/libcrypto.a ;
+lib boost_system : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
 
-alias libdeps :
+lib boost_thread : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+lib boost_coroutine : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+lib boost_context : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+lib boost_filesystem : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+lib ssl : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+lib crypto : : : :
+	<cxxflags>$(CFLAGS)
+	<linkflags>$(LDFLAGS)
+;
+
+alias simple-web-server : : : : <cxxflags>"--std=c++1y $(CFLAGS)" ;
+
+alias needy-managed-libs :
 	boost_system
 	boost_thread
 	boost_coroutine
@@ -21,14 +51,13 @@ alias libdeps :
 	boost_filesystem
 	ssl
 	crypto
-: :
-	<link>static
+	simple-web-server
 ;
 
-exe rest-server : [ glob src/*.cpp ] libdeps :
-	<cxxflags>"--std=c++1y -fcolor-diagnostics $(CFLAGS)"
+exe rest-server : [ glob src/*.cpp ] needy-managed-libs :
+	<cxxflags>"-fcolor-diagnostics"
 ;
 
-exe stresser : [ glob tests/*.cpp ] libdeps :
-	<cxxflags>"--std=c++1y -fcolor-diagnostics $(CFLAGS)"
+exe stresser : [ glob tests/*.cpp ] needy-managed-libs :
+	<cxxflags>"-fcolor-diagnostics"
 ;
